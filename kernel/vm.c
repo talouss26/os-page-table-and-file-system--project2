@@ -487,10 +487,39 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 }
 
 
+//Thêm hàm để phụ trợ
+void
+vmprint_recursive(pagetable_t pagetable, int level)
+{
+  // Có 512 entries trong mỗi trang
+  for(int i = 0; i < 512; i++){
+    pte_t pte = pagetable[i];
+    if(pte & PTE_V){ // Chỉ in nếu bit Valid được bật
+      // In dấu ".." tương ứng với cấp độ
+      for(int j = 0; j <= level; j++) {
+          if(j == 0) printf("..");
+          else printf(" ..");
+      }
+
+      uint64 pa = PTE2PA(pte); // Chuyển PTE thành địa chỉ vật lý
+      printf("%d: pte %p pa %p\n", i, (void*)pte, (void*)pa);
+
+      // Nếu không phải tầng cuối (level 0), tiếp tục đệ quy xuống dưới
+      if((pte & (PTE_R|PTE_W|PTE_X)) == 0){
+        uint64 child = PTE2PA(pte);
+        vmprint_recursive((pagetable_t)child, level + 1);
+      }
+    }
+  }
+}
+
+
 #ifdef LAB_PGTBL
 void
 vmprint(pagetable_t pagetable) {
   // your code here
+  printf("page table %p\n", pagetable);
+  vmprint_recursive(pagetable, 0);
 }
 #endif
 
