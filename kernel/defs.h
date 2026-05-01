@@ -164,6 +164,8 @@ void            uartputc_sync(int);
 int             uartgetc(void);
 
 // vm.c
+void vmprint(pagetable_t); //in bảng phân trang 
+void vmprint_recursive(pagetable_t pagetable, int level);//Hàm đệ quy phụ trợ cho phân trang 
 void            kvminit(void);
 void            kvminithart(void);
 void            kvmmap(pagetable_t, uint64, uint64, uint64, int);
