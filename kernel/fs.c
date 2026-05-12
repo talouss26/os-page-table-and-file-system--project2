@@ -397,7 +397,7 @@ bmap(struct inode *ip, uint bn)
   bn -= NDIRECT;
 
   if(bn < NINDIRECT){
-    if((addr = ip->addrs[NDIRECT]) == 0){
+    if((addr = ip->addrs[NDIRECT]) == 0){ 
       addr = balloc(ip->dev);
       if(addr == 0)
         return 0;
@@ -417,7 +417,7 @@ bmap(struct inode *ip, uint bn)
   }
   bn -= NINDIRECT;
 
-  if(bn < NINDIRECT * NINDIRECT){
+  if(bn < NINDIRECT * NINDIRECT){  // Nếu sô thứ tự khối nằm trong phạm vi của khối gián tiếp kép
     if((addr = ip->addrs[NDIRECT+1]) == 0){
       addr = balloc(ip->dev);
       if(addr == 0)

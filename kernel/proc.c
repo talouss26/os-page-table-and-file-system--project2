@@ -106,9 +106,7 @@ allocpid()
 // If found, initialize state required to run in the kernel,
 // and return with p->lock held.
 // If there are no free procs, or a memory allocation fails, return 0.
-static struct proc*
-allocproc(void)
-{
+static struct proc* allocproc(void) {
   struct proc *p;
 
   for(p = proc; p < &proc[NPROC]; p++) {
@@ -131,12 +129,14 @@ found:
     release(&p->lock);
     return 0;
   }
+
+  // Xin cấp phát 1 trang bộ nhớ vật lý
   if((p->usyscall = (struct usyscall *)kalloc()) == 0){
     freeproc(p);
     release(&p->lock);
     return 0;
   }
-  p->usyscall->pid = p->pid;	
+  p->usyscall->pid = p->pid;	//Lấy PID của tiến trình nhét vào vùng nhớ này
   // An empty user page table.
   p->pagetable = proc_pagetable(p);
   if(p->pagetable == 0){
@@ -157,12 +157,11 @@ found:
 // free a proc structure and the data hanging from it,
 // including user pages.
 // p->lock must be held.
-static void
-freeproc(struct proc *p)
-{
+static void freeproc(struct proc *p) {
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
+  // Dọn dẹp tiến trình khi đã chạy xong
   if(p->usyscall)
     kfree((void*)p->usyscall);
   p->usyscall = 0;
@@ -209,6 +208,7 @@ proc_pagetable(struct proc *p)
     uvmfree(pagetable, 0);
     return 0;
   }
+// Nối địa chỉ ảo USYSCALL với RAM vật lý
 if(mappages(pagetable, USYSCALL, PGSIZE,
               (uint64)(p->usyscall), PTE_R | PTE_U) < 0){
     uvmunmap(pagetable, TRAMPOLINE, 1, 0);
